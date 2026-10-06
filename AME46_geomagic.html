@@ -8,15 +8,9 @@ img{max-width:100%;}
 
 <h1>geomagic representation of a real-valued AME(4, 6) state</h1>
 <p>to be published soon...</p>
+<hr>
 
-<figure>
-    <img src="AME46_geomagic_01.png" alt="real-valued representative of AME(4, 6) state as a geomagic square">
-    <figcaption>
-        Real-valued representative of AME(4, 6) state as a geomagic square.
-    </figcaption>
-</figure>
-
-<p>Use the central 6 &times; 6 array in figure above. Each cell gives one row of a 36 &times; 36 matrix U<sub>g</sub>. Read i and j from the printed row and column labels, not their positions. All indices start at 0.</p>
+<p>Use the central 6 &times; 6 array in the figure below. Each cell gives one row of a 36 &times; 36 matrix U<sub>g</sub>. Read i and j from the printed row and column labels, not their positions. All indices start at 0.</p>
 
 <p>In cell (i, j), identify sector k and colour l using the legends. Add the areas of all fragments with this sector and colour, then divide by the area of one whole sector, which is one sixth of the hexagon. Call the result A. Use area or fractional edge length, not angular width.</p>
 
@@ -26,7 +20,15 @@ img{max-width:100%;}
 
 <p>Repeat this procedure for every cell, sector and colour.</p>
 
+<figure>
+    <img src="AME46_geomagic_01.png" alt="real-valued representative of AME(4, 6) state as a geomagic square">
+    <figcaption>
+        Real-valued representative of AME(4, 6) state as a geomagic square.
+    </figcaption>
+</figure>
+
 <p>This recovers the geometric representative U<sub>g</sub>. Recover the original sparse matrix by U = (O_A &otimes; O_B)<sup>T</sup> U<sub>g</sub> (O_C &otimes; I_6), using the local matrices defined in the paper (to be published soon). Divide matrix entries by 6 only when converting them to normalized state amplitudes.</p>
+
 <hr>
 
 <p>update: 2026-10-06</p>
