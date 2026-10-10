@@ -16,6 +16,7 @@ a{color:#00f;}
 .in-preparation{color:#ddd;}
 
 /* publication list */
+#status{margin:0 0 14px;color:var(--muted)}
 .references{margin:0;padding-left:2.2rem}.publication{padding:5px 0 9px 4px}.publication::marker{color:var(--muted)}
 .reference-line{display:block;color:var(--text)}.journal-link,.doi-link{color:var(--link);text-decoration:none}.journal-link:hover,.doi-link:hover{text-decoration:underline}
 .citation-line{margin-top:2px;color:var(--muted);font-size:13px}.error{color:var(--error)}
