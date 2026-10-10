@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DOI citation lookup: OpenAlex and Crossref</title>
+<style>
+:root{--text:#172033;--muted:#687386;--link:#2457c5;--error:#a61b1b}
+*{box-sizing:border-box} body{margin:24px;color:var(--text);font:14px/1.4 Arial,sans-serif}
+h1{margin:0 0 6px;font-size:22px} #status{margin:0 0 14px;color:var(--muted)}
+.references{margin:0;padding-left:2.2rem}.publication{padding:5px 0 9px 4px}.publication::marker{color:var(--muted)}
+.reference-line{display:block;color:var(--text)}.journal-link,.doi-link{color:var(--link);text-decoration:none}.journal-link:hover,.doi-link:hover{text-decoration:underline}
+.citation-line{margin-top:2px;color:var(--muted);font-size:13px}.error{color:var(--error)}
+.summary{margin-top:14px;font-weight:700}.source-note{margin-top:7px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<h1>publications (experimental engine)</h1>
+<p id="status" aria-live="polite">loading citation data automatically...</p>
+<ol id="rows" class="references" aria-label="Publication citations"></ol>
+<div id="summary" class="summary"></div>
+<div class="source-note">supported by Lumo</div> <!-- If metadata cannot be fetched, the clickable DOI is shown instead. -->
+<script>
+const HIGHLIGHTED_AUTHOR="Wojciech Bruzda";
+const INPUTS=[
+"10.48550/arXiv.2603.18193",
+"10.1088/2058-9565/ae46d6",
+"10.48550/arXiv.2511.17764",
+"10.1088/1367-2630/ae6e96",
+"10.48550/arXiv.2508.15546",
+"10.1142/S1230161224500082",
+"10.1515/spma-2024-0010",
+//"10.48550/arXiv.2401.01671",
+"10.1080/03081087.2023.2211717",
+"10.1063/5.0144667",
+"10.1088/1742-6596/2448/1/012003",
+"10.22331/q-2023-02-02-911",
+"10.1103/PhysRevLett.128.080507",
+"10.1007/s11786-018-0379-8",
+"10.1103/PhysRevA.96.022105",
+"10.1088/1751-8113/45/7/075203",
+"10.1103/PhysRevE.81.066209",
+"10.1088/1751-8113/42/36/365209",
+"10.1016/j.physleta.2008.11.043",
+"10.1063/1.2716990"
+];
+const rows=document.getElementById("rows"),statusEl=document.getElementById("status"),summaryEl=document.getElementById("summary");
+function normalizeDOI(v){const s=String(v).trim(),a=s.match(/arxiv\.org\/(?:abs|pdf)\/([^?#/]+?)(?:\.pdf)?(?:[?#]|$)/i);if(a)return`10.48550/arXiv.${a[1]}`;const d=s.match(/10\.\d{4,9}\/[\-._;()/:A-Z0-9]+/i);return d?d[0].replace(/[).,;]+$/,""):null}
+function initials(g){return String(g||"").trim().split(/[\s-]+/).filter(Boolean).map(x=>Array.from(x.replace(/\./g,""))[0]).filter(Boolean).map(x=>x.toUpperCase()+".").join(" ")}
+function crAuthors(w){return(w.author||[]).map(a=>[initials(a.given),a.family].filter(Boolean).join(" ")).filter(Boolean).join(", ")}
+function oaAuthors(w){return(w.authorships||[]).map(a=>a.author?.display_name).filter(Boolean).join(", ")}
+async function crossref(doi){const r=await fetch(`https://api.crossref.org/works/${encodeURIComponent(doi)}`);if(!r.ok)throw Error(`Crossref HTTP ${r.status}`);const w=(await r.json()).message;return{title:w.title?.[0]||"",authors:crAuthors(w),source:w["container-title"]?.[0]||w.publisher||"",volume:w.volume||"",issue:w.issue||"",pages:w.page||w["article-number"]||"",year:w.issued?.["date-parts"]?.[0]?.[0]||w.published?.["date-parts"]?.[0]?.[0]||"",citations:w["is-referenced-by-count"]??0}}
+async function openalex(doi){const r=await fetch(`https://api.openalex.org/works/${encodeURIComponent(`https://doi.org/${doi}`)}`);if(!r.ok)throw Error(`OpenAlex HTTP ${r.status}`);const w=await r.json(),b=w.biblio||{};return{title:w.title||w.display_name||"",authors:oaAuthors(w),source:w.primary_location?.source?.display_name||"",volume:b.volume||"",issue:b.issue||"",pages:b.first_page?(b.last_page&&b.last_page!==b.first_page?`${b.first_page}–${b.last_page}`:b.first_page):"",year:w.publication_year||"",citations:w.cited_by_count??0}}
+function journal(m){let x=m.source||"";if(m.volume)x+=(x?" ":"")+m.volume;if(m.issue)x+=`(${m.issue})`;if(m.pages)x+=(x?", ":"")+m.pages;return x}
+function normalizedName(name){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\./g,"").replace(/\s+/g," ").trim().toLowerCase()}
+function isHighlightedAuthor(name){
+  const candidate=normalizedName(name),target=normalizedName(HIGHLIGHTED_AUTHOR);
+  const c=candidate.split(" "),t=target.split(" "),candidateFamily=c.at(-1),targetFamily=t.at(-1);
+  if(candidateFamily!==targetFamily)return false;
+  const candidateGiven=c.slice(0,-1).join(""),targetGiven=t.slice(0,-1).join("");
+  return candidateGiven===targetGiven||candidateGiven===targetGiven[0]||targetGiven===candidateGiven[0];
+}
+function appendAuthors(parent,authors){
+  String(authors||"").split(",").map(x=>x.trim()).filter(Boolean).forEach((name,i,list)=>{
+    const node=document.createElement(isHighlightedAuthor(name)?"strong":"span");
+    node.textContent=name;parent.appendChild(node);
+    if(i<list.length-1)parent.appendChild(document.createTextNode(", "));
+  });
+}
+function show(input,doi,m,oa,cr){
+  const li=document.createElement("li");li.className="publication";
+  const line=document.createElement("div");line.className="reference-line";
+  if(m){
+    if(m.authors){appendAuthors(line,m.authors);line.appendChild(document.createTextNode("; "))}
+    if(m.title)line.appendChild(document.createTextNode(`“${m.title}”, `));
+    const j=journal(m);
+    if(j){
+      const link=document.createElement("a");link.className="journal-link";link.href=`https://doi.org/${doi}`;
+      link.target="_blank";link.rel="noopener noreferrer";link.title=doi;link.textContent=j;line.appendChild(link);
+      if(m.year)line.appendChild(document.createTextNode(` (${m.year})`));
+    }else if(m.year)line.appendChild(document.createTextNode(`(${m.year})`));
+  }else{
+    const link=document.createElement("a");link.className="doi-link";link.href=doi?`https://doi.org/${doi}`:input;
+    link.target="_blank";link.rel="noopener noreferrer";link.textContent=doi||input;line.appendChild(link);
+    if(!doi)line.classList.add("error");
+  }
+  li.appendChild(line);
+  const c=document.createElement("div");c.className="citation-line";
+  c.textContent=`citations: ${oa??"-"} / ${cr??"-"} (OpenAlex/Crossref)`;li.appendChild(c);rows.appendChild(li);
+}
+async function lookup(input){const doi=normalizeDOI(input);if(!doi){show(input,null,null,null,null);return{valid:false,oa:0,cr:0}}const[a,b]=await Promise.allSettled([openalex(doi),crossref(doi)]),oa=a.status==="fulfilled"?a.value:null,cr=b.status==="fulfilled"?b.value:null,m=cr||oa;show(input,doi,m,oa?.citations,cr?.citations);return{valid:!!m,oa:oa?.citations||0,cr:cr?.citations||0}}
+async function load(){rows.replaceChildren();const out=[];for(let i=0;i<INPUTS.length;i++){statusEl.textContent=`loading ${i+1} of ${INPUTS.length}...`;out.push(await lookup(INPUTS[i]))}const found=out.filter(x=>x.valid).length,oa=out.reduce((s,x)=>s+x.oa,0),cr=out.reduce((s,x)=>s+x.cr,0);statusEl.textContent=`fetched ${found} of ${INPUTS.length} DOI entries`;summaryEl.textContent=`totals citations: OpenAlex: ${oa.toLocaleString()} / Crossref: ${cr.toLocaleString()}`}
+document.addEventListener("DOMContentLoaded",load);
+</script>
+</body>
+</html>
