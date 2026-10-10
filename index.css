@@ -14,3 +14,10 @@ a{color:#00f;}
 .information{font-family: monospace;}
 .lecture-date{color:#aaa;}
 .in-preparation{color:#ddd;}
+
+/* publication list */
+.references{margin:0;padding-left:2.2rem}.publication{padding:5px 0 9px 4px}.publication::marker{color:var(--muted)}
+.reference-line{display:block;color:var(--text)}.journal-link,.doi-link{color:var(--link);text-decoration:none}.journal-link:hover,.doi-link:hover{text-decoration:underline}
+.citation-line{margin-top:2px;color:var(--muted);font-size:13px}.error{color:var(--error)}
+.summary{margin-top:14px;font-weight:700}.source-note{margin-top:7px;color:var(--muted);font-size:12px}
+
