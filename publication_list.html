@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DOI citation lookup: OpenAlex and Crossref</title>
+<title>wojciech bruzda (CFT PAN)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- DOI citation lookup: OpenAlex and Crossref -->
+<meta charset="UTF-8">
+<link rel="stylesheet" href="index.css">
+<!--base target="_blank"-->
 <style>
 :root{--text:#172033;--muted:#687386;--link:#2457c5;--error:#a61b1b}
 *{box-sizing:border-box} body{margin:24px;color:var(--text);font:14px/1.4 Arial,sans-serif}
@@ -13,15 +17,18 @@ h1{margin:0 0 6px;font-size:22px} #status{margin:0 0 14px;color:var(--muted)}
 .summary{margin-top:14px;font-weight:700}.source-note{margin-top:7px;color:var(--muted);font-size:12px}
 </style>
 </head>
+
 <body>
-<h1>publications (experimental engine)</h1>
+<h1><a href="index.html">wojciech bruzda</a> &bull; <a href="https://orcid.org/0000-0001-9743-7927" target="_blank"><code>0000-0001-9743-7927</code></a> <!--&bull; <a href="https://www.webofscience.com/wos/author/record/KHW-7897-2024" target="_blank">WoS</a--></h1>
+<h2>publications (experimental engine)</h2>
 <p id="status" aria-live="polite">loading citation data automatically...</p>
 <ol id="rows" class="references" aria-label="Publication citations"></ol>
 <div id="summary" class="summary"></div>
-<div class="source-note">supported by Lumo</div> <!-- If metadata cannot be fetched, the clickable DOI is shown instead. -->
+<div class="source-note">supported by Lumo</div> <!-- if metadata cannot be fetched, the clickable DOI is shown instead -->
 <script>
 const HIGHLIGHTED_AUTHOR="Wojciech Bruzda";
 const INPUTS=[
+"10.48550/arXiv.2607.25954",
 "10.48550/arXiv.2603.18193",
 "10.1088/2058-9565/ae46d6",
 "10.48550/arXiv.2511.17764",
